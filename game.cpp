@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #define N 10
 using namespace std;
+enum {NONE, WALL, BOX, DEST, SKY, PLAYER};
 
 struct Object{
   int xPosition;
@@ -19,7 +20,7 @@ int push = 0;
 int step = 0;
 
 int levWidth(int level){
-  int width[2] = {6, 10};
+  int width[4] = {6, 8, 7, 10};
   return width[level];
 }
 
@@ -28,28 +29,51 @@ void levList(int *h, int *w, int *array, int y, int x, int n){
     *h = 7;
     *w = 6;
     int map0[7][6] = {
-      {1,1,1,1,1,1},
-      {1,0,2,1,1,1},
-      {1,0,0,1,1,1},
-      {1,2,5,0,0,1},
-      {1,4,0,4,0,1},
-      {1,0,0,1,1,1},
+      {1,1,1,1,1,4},
+      {1,0,0,0,1,4},
+      {1,3,3,3,1,4},
+      {1,2,2,2,1,1},
+      {1,0,0,0,0,1},
+      {1,0,5,0,0,1},
       {1,1,1,1,1,1}};
       *array = map0[y][x];
   }else if(n == 1){
-    *h = 9;
+    *h = 6;
+    *w = 8;
+    int map1[6][8]={
+      {1,1,1,1,1,1,1,1},
+      {1,3,0,0,0,0,0,1},
+      {1,0,3,2,2,2,5,1},
+      {1,3,0,0,0,0,0,1},
+      {1,1,1,1,1,0,0,1},
+      {4,4,4,4,1,1,1,1}};
+      *array=map1[y][x];
+  }else if(n == 2){
+    *h = 8;
+    *w = 7;
+    int map2[8][7]={
+      {1,1,1,1,1,1,1},
+      {1,0,0,0,0,0,1},
+      {1,0,3,2,3,0,1},
+      {1,0,2,3,2,0,1},
+      {1,0,3,2,3,0,1},
+      {1,0,2,3,2,0,1},
+      {1,0,0,5,0,0,1},
+      {1,1,1,1,1,1,1}};
+      *array=map2[y][x];
+  }else if(n == 3){
+    *h = 8;
     *w = 10;
-    int map1[9][10] = {
-      {1,1,1,1,1,1,1,1,1,1},
-      {1,0,0,0,1,1,1,1,1,1},
-      {1,0,1,0,1,0,2,1,1,1},
-      {1,0,0,0,0,4,0,1,1,1},
-      {1,1,1,0,1,4,2,0,0,1},
-      {1,0,0,0,1,5,0,0,0,1},
-      {1,0,1,0,1,1,1,1,1,1},
-      {1,0,0,0,1,1,1,1,1,1},
+    int map3[8][10] = {
+      {4,1,1,1,1,4,4,4,4,4},
+      {4,1,0,0,1,1,1,1,4,4},
+      {4,1,0,0,0,0,0,1,1,4},
+      {1,1,0,1,1,0,0,0,1,4},
+      {1,3,0,3,1,0,5,2,1,1},
+      {1,0,0,0,1,0,2,2,0,1},
+      {1,0,0,3,1,0,0,0,0,1},
       {1,1,1,1,1,1,1,1,1,1}};
-      *array = map1[y][x];
+      *array = map3[y][x];
   }
 }
 
@@ -64,7 +88,7 @@ void palette(){
 
 void level(int n){
   clear();
-  mvprintw(5,levWidth(lev) + 15,"Level : %d", lev);
+  mvprintw(5,levWidth(lev) + 15,"Level : %d", lev + 1);
   mvprintw(1,1,"Welcome! Use keypad to move.");
   mvprintw(2,1,"Press 'R' to Restart, M' to switch map, 'Q' to Quit.");
   int x = 0, y = 0, h = 1, w = 1, map;
@@ -75,10 +99,11 @@ void level(int n){
     for(x=0; x<w; x++){
       levList(&h, &w, &map, y, x, n);
       switch(map){
-        case 0 : mvaddch(y+5, x+10, '-' | COLOR_PAIR(4)); break;  //빈칸(하늘)
-        case 1 : mvaddch(y+5, x+10, '#' | COLOR_PAIR(1)); break;  //벽
-        case 2 : mvaddch(y+5, x+10, 'X' | COLOR_PAIR(2)); break;  //목적지
-        case 4 :
+        case NONE : mvaddch(y+5, x+10, '-' | COLOR_PAIR(4)); break;
+        case SKY : mvaddch(y+5, x+10, ' ' | COLOR_PAIR(4)); break;  //빈칸, 하늘
+        case WALL : mvaddch(y+5, x+10, '#' | COLOR_PAIR(1)); break;  //벽
+        case DEST : mvaddch(y+5, x+10, 'X' | COLOR_PAIR(2)); break;  //목적지
+        case BOX :
           mvaddch(y+5, x+10, '-' | COLOR_PAIR(4));
           wbox += 1;
           obj[wbox].ozn = mvinch(y+5, x+10);
@@ -87,7 +112,7 @@ void level(int n){
           obj[wbox].zn = 'O';           //상자
           mvaddch(obj[wbox].yPosition, obj[wbox].xPosition, obj[wbox].zn | COLOR_PAIR(5));
           break;
-        case 5 :
+        case PLAYER :
           mvaddch(y+5, x+10, '-' | COLOR_PAIR(4));
           obj[0].ozn = mvinch(y+5, x+10);
           obj[0].yPosition = y+5;
