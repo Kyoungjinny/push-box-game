@@ -200,7 +200,7 @@ void play(int input){
       break;
     case KEY_RIGHT:
       if(rg != 35){
-        if(rg == 79 && (org == 88)){
+        if(rg == 79 && (org == 45 || org == 88)){
           obj[0].xPosition += 1;
           step++;
           for(int o=1; o<=wbox; o++){
@@ -218,7 +218,7 @@ void play(int input){
     case 'm':
     case 'M':
       restart = TRUE;
-      if(lev < 2){lev += 1;}
+      if(lev < 3){lev += 1;}
       else{lev = 0;}
       level(lev);
       break;
