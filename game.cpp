@@ -1,5 +1,4 @@
 #include <ncurses.h>
-//#include <iostream>
 #include <stdlib.h>
 #define N 10
 using namespace std;
@@ -8,10 +7,10 @@ enum {NONE, WALL, BOX, DEST, SKY, PLAYER};
 struct Object{
   int xPosition;
   int yPosition;
-  unsigned char zn;       // sky = '-', wall = '#'
-                          // destination = 'X', box = 'O'
-                          // player = 'P'
-  chtype ozn;
+  unsigned char rawChar;       // sky = '-', wall = '#'
+                               // destination = 'X', box = 'O'
+                               // player = 'P'
+  chtype outputChar;
 };
 struct Object obj[N] = {};
 int wbox = 0;
@@ -106,19 +105,19 @@ void level(int n){
         case BOX :
           mvaddch(y+5, x+10, '-' | COLOR_PAIR(4));
           wbox += 1;
-          obj[wbox].ozn = mvinch(y+5, x+10);
+          obj[wbox].outputChar = mvinch(y+5, x+10);
           obj[wbox].yPosition = y+5;
           obj[wbox].xPosition = x+10;
-          obj[wbox].zn = 'O';           //상자
-          mvaddch(obj[wbox].yPosition, obj[wbox].xPosition, obj[wbox].zn | COLOR_PAIR(5));
+          obj[wbox].rawChar = 'O';           //상자
+          mvaddch(obj[wbox].yPosition, obj[wbox].xPosition, obj[wbox].rawChar | COLOR_PAIR(5));
           break;
         case PLAYER :
           mvaddch(y+5, x+10, '-' | COLOR_PAIR(4));
-          obj[0].ozn = mvinch(y+5, x+10);
+          obj[0].outputChar = mvinch(y+5, x+10);
           obj[0].yPosition = y+5;
           obj[0].xPosition = x+10;
-          obj[0].zn = 'P';                //player
-          mvaddch(obj[0].yPosition, obj[0].xPosition, obj[0].zn | COLOR_PAIR(3));
+          obj[0].rawChar = 'P';                //player
+          mvaddch(obj[0].yPosition, obj[0].xPosition, obj[0].rawChar | COLOR_PAIR(3));
         break;
       }
     }
@@ -142,7 +141,7 @@ void play(int input){
   org = (mvinch(obj[0].yPosition, obj[0].xPosition+2) & A_CHARTEXT);
 
   for(int o=0; o<=wbox; o++){
-    mvaddch(obj[o].yPosition, obj[o].xPosition, obj[o].ozn);
+    mvaddch(obj[o].yPosition, obj[o].xPosition, obj[o].outputChar);
   }
 
   switch(input){
@@ -232,8 +231,8 @@ void play(int input){
   }
   if(!restart){
     for(int o=0; o<=wbox; o++){
-      obj[o].ozn = mvinch(obj[o].yPosition, obj[o].xPosition);
-      mvaddch(obj[o].yPosition, obj[o].xPosition, obj[o].zn | ((o == 0) ? COLOR_PAIR(3) : COLOR_PAIR(5)));
+      obj[o].outputChar = mvinch(obj[o].yPosition, obj[o].xPosition);
+      mvaddch(obj[o].yPosition, obj[o].xPosition, obj[o].rawChar | ((o == 0) ? COLOR_PAIR(3) : COLOR_PAIR(5)));
     }
     move(obj[0].yPosition, obj[0].xPosition);
   }else{
